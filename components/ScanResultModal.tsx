@@ -68,7 +68,7 @@ const ScanResultModal: React.FC<ScanResultModalProps> = ({
             <X size={20} />
           </button>
         </div>
-
+        
         <div className="p-6 flex flex-col items-center text-center">
           {/* Score Indicator */}
           <div className="mb-4">

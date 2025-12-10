@@ -23,8 +23,14 @@ const App: React.FC = () => {
       setSession(session);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
+      
+      // Show success message when user logs in
+      if (event === 'SIGNED_IN') {
+        setNotification({ message: "Login successful! Welcome back.", type: 'success' });
+      }
+
       if (session) {
         if (currentView === View.LOGIN || currentView === View.SIGNUP) {
             setCurrentView(View.DASHBOARD);
@@ -37,7 +43,7 @@ const App: React.FC = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [currentView]); // Added currentView dependency to prevent stale closure
 
   const handleLoginNavigation = () => {
     setCurrentView(View.LOGIN);

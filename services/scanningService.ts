@@ -55,67 +55,78 @@ export const analyzeFileWithAI = async (
     try {
       const vision = await analyzeImageWithGoogleVision(url, fileId);
 
-      // Check for API/Edge Function Errors
+      // Check for Errors
       if (vision.error) {
         const msg = vision.error.message || "";
-        
-        if (msg.includes("Connection Failed") || msg.includes("Failed to send a request")) {
-           issues.push("Info: AI Server function not deployed (Skipped).");
-        } else if (msg.includes("is disabled") || msg.includes("has not been used")) {
-           issues.push("Info: Cloud Vision API disabled (Skipped).");
+        // Don't deduct too much score for API configuration errors, but show them
+        if (msg.includes("Cloud Vision API has not been used") || msg.includes("is disabled")) {
+           issues.push("Info: AI API not enabled in Google Console.");
         } else {
-           healthScore -= 15;
+           healthScore -= 10;
            issues.push(`Error: AI Analysis failed - ${msg}`);
         }
       } 
-      // CASE D: Successful Analysis
+      // CASE: Successful Analysis
       else if (vision && Object.keys(vision).length > 0) {
         
-        // 1. LABELS (What is in the image?)
+        // 1. LABELS (Positive Identification)
         if (vision.labelAnnotations && vision.labelAnnotations.length > 0) {
+            // Get top 3 tags with high confidence
             const topLabels = vision.labelAnnotations
-                .slice(0, 3) // Get top 3 tags
+                .filter(l => l.score > 0.7)
+                .slice(0, 4) 
                 .map(l => l.description)
                 .join(", ");
-            // We add this as an "Info" item, not a penalty
-            issues.push(`AI Identified: ${topLabels}`);
+            
+            if (topLabels) {
+                issues.push(`AI Identified: ${topLabels}`);
+            }
         }
 
-        // 2. OCR (Is there text?)
+        // 2. OCR (Text Detection)
         if (vision.fullTextAnnotation?.text) {
              const textLen = vision.fullTextAnnotation.text.length;
-             issues.push(`AI Text Scan: Detected ${textLen} characters of text.`);
+             // If text is found, it's usually a good sign for scanned docs
+             issues.push(`AI Text Scan: Verified ${textLen} characters of readable text.`);
         }
 
-        // 3. Blur/Quality
+        // 3. Blur/Quality Detection
+        // Note: Google Vision doesn't return a direct "Blur" score, we infer from SafeSearch or Labels
         if (vision.labelAnnotations) {
            const labels = vision.labelAnnotations.map(l => l.description.toLowerCase());
-           if (labels.some(l => l.includes("blur"))) {
-              healthScore -= 15;
-              issues.push("Issue: AI detected image is blurry.");
+           if (labels.some(l => l.includes("blur") || l.includes("out of focus"))) {
+              healthScore -= 20;
+              issues.push("Issue: AI detected significant blurriness.");
            }
         }
 
-        // 4. Safe Search
+        // 4. Safe Search (Content Integrity)
         const safe = vision.safeSearchAnnotation;
         if (safe) {
-          if (["LIKELY", "VERY_LIKELY"].includes(safe.adult) || ["LIKELY", "VERY_LIKELY"].includes(safe.violence)) {
-            issues.push("Warning: AI flagged sensitive content.");
-            healthScore -= 20;
+          const risky = ["LIKELY", "VERY_LIKELY"];
+          if (risky.includes(safe.adult) || risky.includes(safe.violence) || risky.includes(safe.racy)) {
+            issues.push("Warning: AI flagged potentially unsafe or sensitive content.");
+            healthScore -= 25;
           }
         }
         
-        // 5. Properties (Dominant Color Variance)
-        if (vision.imagePropertiesAnnotation?.dominantColors?.colors?.length && 
-            vision.imagePropertiesAnnotation.dominantColors.colors.length < 2) {
-            healthScore -= 10;
-            issues.push("Issue: Low color variance (Possible blank scan).");
+        // 5. Properties (Color Variance)
+        // Helps detect completely black or white images
+        if (vision.imagePropertiesAnnotation?.dominantColors?.colors?.length) {
+            const colors = vision.imagePropertiesAnnotation.dominantColors.colors;
+            if (colors.length < 2) {
+                 healthScore -= 15;
+                 issues.push("Issue: Low color variance (Possible blank/corrupted scan).");
+            }
         }
+      } else {
+        // Empty response but no error
+        issues.push("Info: AI returned no specific insights.");
       }
 
     } catch (e) {
       console.warn("AI Logic Exception", e);
-      issues.push("Error: AI Scan skipped due to internal error.");
+      issues.push("Error: AI Scan skipped due to internal processing error.");
     }
   }
 

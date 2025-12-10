@@ -1,0 +1,5 @@
+{
+  "name": "ai-guardian-help",
+  "description": "Digital Data Decay Detector: Detects shadow data decay, corrupted files, and missing metadata using AI analysis.",
+  "requestFramePermissions": []
+}

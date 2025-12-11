@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Mail, Lock, ShieldCheck, Loader2, ArrowRight, RefreshCw, CheckCircle } from 'lucide-react';
+import { Mail, Lock, ShieldCheck, Loader2, ArrowRight } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 
 interface LoginProps {
@@ -11,15 +12,12 @@ const Login: React.FC<LoginProps> = ({ onNavigateHome, onNavigateSignup }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [resending, setResending] = useState(false);
   const [message, setMessage] = useState<{ text: string, type: 'error' | 'success' } | null>(null);
-  const [showResend, setShowResend] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
-    setShowResend(false);
 
     const cleanEmail = email.trim();
 
@@ -34,40 +32,14 @@ const Login: React.FC<LoginProps> = ({ onNavigateHome, onNavigateSignup }) => {
     } catch (error: any) {
       let errorMsg = error.message || 'Login failed';
       
-      // Handle "Email not confirmed" specifically
+      // Friendly message for unconfirmed emails
       if (errorMsg.includes('Email not confirmed')) {
-        errorMsg = 'Your email address has not been verified yet.';
-        setShowResend(true);
-      } else if (errorMsg.includes('Invalid login credentials')) {
-        errorMsg = 'Incorrect email or password.';
+        errorMsg = 'Email not confirmed. Please check your inbox for the verification link.';
       }
       
       setMessage({ text: errorMsg, type: 'error' });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleResendVerification = async () => {
-    if (!email) return;
-    setResending(true);
-    try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: email.trim(),
-      });
-      
-      if (error) throw error;
-      
-      setMessage({ 
-        text: 'Verification email resent! Please check your inbox (and spam folder).', 
-        type: 'success' 
-      });
-      setShowResend(false); // Hide button after success
-    } catch (error: any) {
-      setMessage({ text: `Failed to resend: ${error.message}`, type: 'error' });
-    } finally {
-      setResending(false);
     }
   };
 
@@ -94,23 +66,8 @@ const Login: React.FC<LoginProps> = ({ onNavigateHome, onNavigateSignup }) => {
 
           {/* Status Messages */}
           {message && (
-            <div className={`mb-4 p-4 rounded-lg text-sm flex flex-col gap-2 ${message.type === 'error' ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-green-50 text-green-600 border border-green-200'}`}>
-              <div className="flex items-start gap-2">
-                 {message.type === 'success' && <CheckCircle size={16} className="mt-0.5 shrink-0" />}
-                 <span>{message.text}</span>
-              </div>
-              
-              {/* Resend Button - Only show on specific error */}
-              {showResend && message.type === 'error' && (
-                <button 
-                  onClick={handleResendVerification}
-                  disabled={resending}
-                  className="self-start mt-1 text-xs font-semibold underline hover:text-red-800 flex items-center gap-1"
-                >
-                  {resending ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
-                  Resend Verification Email
-                </button>
-              )}
+            <div className={`mb-4 p-3 rounded-lg text-sm flex items-start gap-2 ${message.type === 'error' ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-green-50 text-green-600 border border-green-200'}`}>
+              <span>{message.text}</span>
             </div>
           )}
 
@@ -138,9 +95,7 @@ const Login: React.FC<LoginProps> = ({ onNavigateHome, onNavigateSignup }) => {
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between">
-                <label className="text-sm font-medium text-gray-700 ml-1">Password</label>
-              </div>
+              <label className="text-sm font-medium text-gray-700 ml-1">Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                   <Lock size={18} />

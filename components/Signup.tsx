@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Mail, Lock, UserPlus, Loader2, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Mail, Lock, UserPlus, Loader2, ArrowLeft, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 
 interface SignupProps {
@@ -11,10 +10,13 @@ const Signup: React.FC<SignupProps> = ({ onNavigateLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ text: string, type: 'error' | 'success' } | null>(null);
+  // Added 'warning' to the type definition
+  const [message, setMessage] = useState<{ text: string, type: 'error' | 'success' | 'warning' } | null>(null);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+    
     setLoading(true);
     setMessage(null);
 
@@ -27,9 +29,15 @@ const Signup: React.FC<SignupProps> = ({ onNavigateLogin }) => {
     }
 
     try {
+      // Use current window location for redirect to ensure links work in all environments
+      const currentUrl = window.location.origin;
+
       const { data, error } = await supabase.auth.signUp({
         email: cleanEmail,
         password,
+        options: {
+          emailRedirectTo: currentUrl,
+        }
       });
 
       if (error) throw error;
@@ -40,7 +48,6 @@ const Signup: React.FC<SignupProps> = ({ onNavigateLogin }) => {
           text: 'Registration successful! 📧 Please check your email to confirm your account before logging in.', 
           type: 'success' 
         });
-        // Do NOT redirect automatically so they see the message
       } else {
         setMessage({ 
           text: 'Signup successful! Logging you in...', 
@@ -52,9 +59,55 @@ const Signup: React.FC<SignupProps> = ({ onNavigateLogin }) => {
       }
 
     } catch (error: any) {
-      setMessage({ text: error.message || 'Signup failed', type: 'error' });
+      const msg = (error.message || '').toLowerCase();
+      console.warn("Signup Error Detail:", error);
+
+      // 1. Rate Limit Error
+      if (msg.includes('rate limit') || msg.includes('too many requests') || error.status === 429) {
+        setMessage({ 
+          text: 'Security Limit: Too many signup attempts. Please wait 1 hour before trying again or check your inbox for an existing email.', 
+          type: 'warning' 
+        });
+      } 
+      // 2. SMTP / Email Sending Error (The specific issue reported)
+      else if (msg.includes('error sending confirmation email') || msg.includes('error sending email')) {
+        setMessage({ 
+          text: 'Service Limit Reached: Unable to send verification email. The daily email limit for this project may have been exceeded. Please try again later.', 
+          type: 'error' 
+        });
+      }
+      // 3. User Already Exists
+      else if (msg.includes('already registered') || msg.includes('unique constraint')) {
+        setMessage({ 
+          text: 'This email is already registered. Please log in instead.', 
+          type: 'warning' 
+        });
+      }
+      // 4. General Error
+      else {
+        setMessage({ text: error.message || 'Signup failed. Please try again.', type: 'error' });
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Helper to determine style based on message type
+  const getMessageStyles = (type: 'error' | 'success' | 'warning') => {
+    switch (type) {
+      case 'success': return 'bg-green-50 text-green-700 border border-green-200';
+      case 'warning': return 'bg-yellow-50 text-yellow-800 border border-yellow-200';
+      case 'error': return 'bg-red-50 text-red-600 border border-red-200';
+      default: return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getMessageIcon = (type: 'error' | 'success' | 'warning') => {
+    switch (type) {
+      case 'success': return <CheckCircle size={16} />;
+      case 'warning': return <AlertTriangle size={16} />;
+      case 'error': return <XCircle size={16} />;
+      default: return null;
     }
   };
 
@@ -79,15 +132,16 @@ const Signup: React.FC<SignupProps> = ({ onNavigateLogin }) => {
           </div>
 
           {message && (
-            <div className={`mb-4 p-4 rounded-lg text-sm flex items-start gap-3 ${message.type === 'error' ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'}`}>
+            <div className={`mb-4 p-4 rounded-lg text-sm flex items-start gap-3 ${getMessageStyles(message.type)}`}>
                <div className="shrink-0 mt-0.5">
-                 {message.type === 'success' ? <CheckCircle size={16} /> : <Loader2 size={16} className="animate-spin" />}
+                 {message.type && getMessageIcon(message.type)}
+                 {loading && !message.type && <Loader2 size={16} className="animate-spin" />}
                </div>
                <span>{message.text}</span>
             </div>
           )}
 
-          {!message?.type || message.type === 'error' ? (
+          {!message?.type || message.type === 'error' || message.type === 'warning' ? (
             <form onSubmit={handleSignup} className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 ml-1">Email Address</label>

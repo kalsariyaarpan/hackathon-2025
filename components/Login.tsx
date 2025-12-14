@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Mail, Lock, ShieldCheck, Loader2, ArrowRight } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
@@ -6,9 +5,10 @@ import { supabase } from '../services/supabaseClient';
 interface LoginProps {
   onNavigateHome: () => void;
   onNavigateSignup: () => void;
+  onLoginSuccess: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onNavigateHome, onNavigateSignup }) => {
+const Login: React.FC<LoginProps> = ({ onNavigateHome, onNavigateSignup, onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,7 +28,15 @@ const Login: React.FC<LoginProps> = ({ onNavigateHome, onNavigateSignup }) => {
       });
 
       if (error) throw error;
-      // Navigation is handled by App.tsx session listener
+      
+      // Show success state locally
+      setMessage({ text: 'Login successful! Redirecting...', type: 'success' });
+      
+      // Short delay to allow user to read "Redirecting..." before unmount/navigation
+      setTimeout(() => {
+        onLoginSuccess();
+      }, 1000);
+      
     } catch (error: any) {
       let errorMsg = error.message || 'Login failed';
       
@@ -39,7 +47,7 @@ const Login: React.FC<LoginProps> = ({ onNavigateHome, onNavigateSignup }) => {
       
       setMessage({ text: errorMsg, type: 'error' });
     } finally {
-      setLoading(false);
+      if (loading) setLoading(false);
     }
   };
 

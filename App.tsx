@@ -25,19 +25,23 @@ const App: React.FC = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) {
-        if (currentView === View.LOGIN || currentView === View.SIGNUP) {
-            setCurrentView(View.DASHBOARD);
-        }
-      } else {
-        if (currentView === View.DASHBOARD) {
-            setCurrentView(View.LOGIN);
-        }
-      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Handle redirection when session changes
+  useEffect(() => {
+    if (session) {
+      if (currentView === View.LOGIN || currentView === View.SIGNUP) {
+        setCurrentView(View.DASHBOARD);
+      }
+    } else {
+      if (currentView === View.DASHBOARD) {
+        setCurrentView(View.LOGIN);
+      }
+    }
+  }, [session, currentView]);
 
   const handleLoginNavigation = () => {
     setCurrentView(View.LOGIN);
@@ -249,12 +253,24 @@ const App: React.FC = () => {
         return session ? (
           <Dashboard files={files} session={session} onAnalyze={handleAnalyze} onBackup={handleBackup} />
         ) : (
-          <Login onNavigateHome={() => setCurrentView(View.HOME)} onNavigateSignup={() => setCurrentView(View.SIGNUP)} />
+          <Login 
+            onNavigateHome={() => setCurrentView(View.HOME)} 
+            onNavigateSignup={() => setCurrentView(View.SIGNUP)}
+            onLoginSuccess={() => {
+              // Trigger notification and ensure navigation to Dashboard
+              setNotification({ message: "Login successful!", type: "success" });
+              setCurrentView(View.DASHBOARD);
+            }}
+          />
         );
       case View.LOGIN:
         return <Login 
           onNavigateHome={() => setCurrentView(View.HOME)} 
           onNavigateSignup={() => setCurrentView(View.SIGNUP)}
+          onLoginSuccess={() => {
+             setNotification({ message: "Login successful!", type: "success" });
+             setCurrentView(View.DASHBOARD);
+          }}
         />;
       case View.SIGNUP:
         return <Signup onNavigateLogin={() => setCurrentView(View.LOGIN)} />;

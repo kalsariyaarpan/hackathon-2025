@@ -14,7 +14,7 @@ Every day, billions of images and documents become unreadable due to:
 Most tools only store your files —
 AI Guardian protects them.
 ________________________________________
-
+ 
 🧠 Core Features
 •	🔍 AI Integrity Scanner (Google Vision Analysis)
 •	📊 Health Score & Risk Detection

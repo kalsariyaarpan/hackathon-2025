@@ -79,21 +79,24 @@ Every day, billions of images and documents become unreadable due to:
 ---
 
 
-________________________________________
 
 ## 📂 Project Structure
 
+The project is organized into the following main directories:
 
-src/
-├─ components/
-├─ pages/
-├─ supabase/
-├─ services/
-└─ utils/
+- **src/** – Frontend application source code  
+  - **components/** – Reusable UI components  
+  - **pages/** – Application pages and routing  
+  - **supabase/** – Supabase client and config  
+  - **services/** – API and business logic  
+  - **utils/** – Helper and utility functions  
 
-functions/
-└─ vision-analyze/
-________________________________________
+- **functions/** – Supabase Edge Functions  
+  - **vision-analyze/** – Google Vision AI integration  
+
+- **public/** – Static assets
+
+
 
 
 ---

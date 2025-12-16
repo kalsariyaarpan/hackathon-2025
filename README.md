@@ -1,20 +1,108 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🚀 AI Guardian — Protecting Your Digital Memory
 
-# Run and deploy your AI Studio app
+AI Guardian is an intelligent system that detects, predicts, and protects your digital files from silent data decay.  
+Using **Google Cloud Vision AI** and **Supabase**, it analyzes file integrity, identifies risks, and helps preserve digital archives before they are lost forever.
 
-This contains everything you need to run your app locally.
+---
 
-View your app in AI Studio: https://ai.studio/apps/drive/1TH5Osl-LKI9sFvC2yOKnCgWHbL6XO6kY
+## 🌟 Why AI Guardian?
 
-## Run Locally
+Every day, billions of images and documents become unreadable due to:
 
-**Prerequisites:**  Node.js
+- Bit-rot & storage aging  
+- Outdated file formats  
+- Silent corruption  
+- Missing backups  
+- Lack of proactive monitoring  
+
+> Most tools only **store** your files —  
+> **AI Guardian protects them.**
+
+---
+
+## 🧠 Core Features
+
+- 🔍 **AI Integrity Scanner** (Google Vision Analysis)  
+- 📊 **Health Score & Risk Detection**  
+- ⚠️ **Issue Identification** (blur, corruption, low-quality, missing text)  
+- 🕒 **Scan History Tracking**  
+- ☁️ **Safe Backup System** (Supabase Storage)  
+- 🔐 **Secure User Authentication** (Supabase Auth)  
+- 📁 **File Upload & Metadata Handling**  
+- 📈 **Real-time Dashboard & Insights**  
+- 💡 **Preservation Recommendations**  
+
+---
+
+## 🛠 Tech Stack
+
+### 🔵 Google Technologies
+- Google Cloud Vision API  
+- Google AI Studio  
+- Google Cloud Console  
+
+### 🟦 Supabase
+- Supabase Auth  
+- Supabase Database  
+- Supabase Storage  
+- Supabase Edge Functions  
+
+### 🖥 Frontend
+- TypeScript (AI Studio Generated UI)
+
+---
+
+## 🔄 Process Flow
+
+1. User uploads a file  
+2. File is stored in Supabase Storage  
+3. Metadata is saved in Supabase Database  
+4. AI Scan is triggered  
+5. Supabase Edge Function calls Google Vision API  
+6. Vision AI returns labels, text, image safety, and properties  
+7. AI Guardian generates Health Score & Issue Report  
+8. User views dashboard, scan history, and backup options  
+
+---
+
+## 📸 MVP Snapshots
+
+### 🔐 Login Page
+<img width="1052" height="744" alt="Login Page" src="https://github.com/user-attachments/assets/1fa18666-99a7-461e-8290-265cdc517964" />
+
+### 🏠 Home Page
+<img width="1362" height="889" alt="Home Page" src="https://github.com/user-attachments/assets/a445ecab-1374-4c90-bc70-12529d80bae1" />
+
+### 📤 Upload & Scan
+<img width="1680" height="856" alt="Upload & Scan" src="https://github.com/user-attachments/assets/ab715e09-a9a7-4c58-af98-c66fe53b71f4" />
+
+---
+
+## 📂 Project Structure
+
+The project is organized into the following main directories:
+
+- **src/** – Frontend application source code  
+  - **components/** – Reusable UI components  
+  - **pages/** – Application pages and routing  
+  - **supabase/** – Supabase client and config  
+  - **services/** – API and business logic  
+  - **utils/** – Helper and utility functions  
+
+- **functions/** – Supabase Edge Functions  
+  - **vision-analyze/** – Google Vision AI integration  
+
+- **public/** – Static assets
 
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+---
+
+## 💬 Author
+
+**Arpan Kalsariya**  
+📍 Surat, Gujarat  
+
+- **GitHub:** https://github.com/kalsariyaarpan  
+- **LinkedIn:** https://linkedin.com/in/kalsariya-arpan-a474a8379  
+
+---

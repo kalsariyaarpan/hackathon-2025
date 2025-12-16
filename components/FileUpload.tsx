@@ -101,12 +101,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ files, setFiles, onAnalyze }) =
             >
               Select Files
             </button>
-            <button 
-              onClick={() => alert('Google Drive Picker Placeholder')}
-              className="px-6 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
-            >
-              <HardDrive size={16} /> Google Drive
-            </button>
+          
           </div>
         </div>
       </div>

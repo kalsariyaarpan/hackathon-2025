@@ -33,16 +33,11 @@ const Hero: React.FC<HeroProps> = ({ onStart }) => {
                   e.preventDefault();
                   onStart();
                 }}
-                className="flex items-center justify-center gap-2 px-8 py-4 bg-brand-600 text-white rounded-xl text-lg font-semibold shadow-lg shadow-brand-500/30 hover:bg-brand-700 hover:shadow-brand-500/50 transition-all transform hover:-translate-y-1 z-20"
+                className="flex items-center justify-center gap-2 px-8 py-4 bg-brand-600 text-white rounded-xl text-lg font-semibold shadow-lg shadow-brand-500/30 hover:bg-brand-700 hover:shadow-brand-500/50 transition-all transform hover:-translate-y-1 z-20  w-[-webkit-fill-available]"
               >
                 Scan Your Files <ArrowRight size={20} />
               </button>
-              <button 
-                className="flex items-center justify-center gap-2 px-8 py-4 bg-white text-gray-700 border border-gray-200 rounded-xl text-lg font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all z-20"
-                onClick={() => alert("Google Drive integration coming soon!")}
-              >
-                <HardDrive size={20} /> Connect Drive
-              </button>
+              
             </div>
           </div>
 
